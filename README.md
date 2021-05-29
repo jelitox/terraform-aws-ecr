@@ -1,4 +1,6 @@
+<!-- markdownlint-disable -->
 # terraform-aws-ecr [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-ecr.svg)](https://github.com/cloudposse/terraform-aws-ecr/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+<!-- markdownlint-restore -->
 
 [![README Header][readme_header_img]][readme_header_link]
 
@@ -59,11 +61,37 @@ We literally have [*hundreds of terraform modules*][terraform_modules] that are 
 
 
 
+## Security & Compliance [<img src="https://cloudposse.com/wp-content/uploads/2020/11/bridgecrew.svg" width="250" align="right" />](https://bridgecrew.io/)
+
+Security scanning is graciously provided by Bridgecrew. Bridgecrew is the leading fully hosted, cloud-native solution providing continuous Terraform security and compliance.
+
+| Benchmark | Description |
+|--------|---------------|
+| [![Infrastructure Security](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/general)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=INFRASTRUCTURE+SECURITY) | Infrastructure Security Compliance |
+| [![CIS KUBERNETES](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/cis_kubernetes)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=CIS+KUBERNETES+V1.5) | Center for Internet Security, KUBERNETES Compliance |
+| [![CIS AWS](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/cis_aws)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=CIS+AWS+V1.2) | Center for Internet Security, AWS Compliance |
+| [![CIS AZURE](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/cis_azure)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=CIS+AZURE+V1.1) | Center for Internet Security, AZURE Compliance |
+| [![PCI-DSS](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/pci)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=PCI-DSS+V3.2) | Payment Card Industry Data Security Standards Compliance |
+| [![NIST-800-53](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/nist)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=NIST-800-53) | National Institute of Standards and Technology Compliance |
+| [![ISO27001](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/iso)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=ISO27001) | Information Security Management System, ISO/IEC 27001 Compliance |
+| [![SOC2](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/soc2)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=SOC2)| Service Organization Control 2 Compliance |
+| [![CIS GCP](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/cis_gcp)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=CIS+GCP+V1.1) | Center for Internet Security, GCP Compliance |
+| [![HIPAA](https://www.bridgecrew.cloud/badges/github/cloudposse/terraform-aws-ecr/hipaa)](https://www.bridgecrew.cloud/link/badge?vcs=github&fullRepo=cloudposse%2Fterraform-aws-ecr&benchmark=HIPAA) | Health Insurance Portability and Accountability Compliance |
+
+
+
 ## Usage
 
 
-**IMPORTANT:** The `master` branch is used in `source` just as an example. In your code, do not pin to `master` because there may be breaking changes between releases.
-Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-ecr/releases).
+**IMPORTANT:** We do not pin modules to versions in our examples because of the
+difficulty of keeping the versions in the documentation in sync with the latest released versions.
+We highly recommend that in your code you pin the version to the exact version you are
+using so that your infrastructure remains stable, and update versions in a
+systematic way so that they do not catch you by surprise.
+
+Also, because of a bug in the Terraform registry ([hashicorp/terraform#21417](https://github.com/hashicorp/terraform/issues/21417)),
+the registry shows many of our inputs as required when in fact they are optional.
+The table below correctly indicates which inputs are required.
 
 
 The module creates one or more Elastic Container Registry (ECR) repositories. All repositories created
@@ -94,7 +122,9 @@ data "aws_iam_role" "ecr" {
 }
 
 module "ecr" {
-  source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+  source = "cloudposse/ecr/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
   namespace              = "eg"
   stage                  = "test"
   name                   = "ecr"
@@ -124,16 +154,14 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.0 |
-| aws | >= 2.34 |
-| local | >= 1.2 |
-| template | >= 2.0 |
+| terraform | >= 0.13.0 |
+| aws | >= 3.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.34 |
+| aws | >= 3.1 |
 
 ## Inputs
 
@@ -141,16 +169,18 @@ Available targets:
 |------|-------------|------|---------|:--------:|
 | additional\_tag\_map | Additional tags for appending to tags\_as\_list\_of\_maps. Not added to `tags`. | `map(string)` | `{}` | no |
 | attributes | Additional attributes (e.g. `1`) | `list(string)` | `[]` | no |
-| context | Single object for setting entire context at once.<br>See description of individual variables for details.<br>Leave string and numeric variables as `null` to use default value.<br>Individual variable settings (non-null) override settings in context object,<br>except for attributes, tags, and additional\_tag\_map, which are merged. | <pre>object({<br>    enabled             = bool<br>    namespace           = string<br>    environment         = string<br>    stage               = string<br>    name                = string<br>    delimiter           = string<br>    attributes          = list(string)<br>    tags                = map(string)<br>    additional_tag_map  = map(string)<br>    regex_replace_chars = string<br>    label_order         = list(string)<br>    id_length_limit     = number<br>  })</pre> | <pre>{<br>  "additional_tag_map": {},<br>  "attributes": [],<br>  "delimiter": null,<br>  "enabled": true,<br>  "environment": null,<br>  "id_length_limit": null,<br>  "label_order": [],<br>  "name": null,<br>  "namespace": null,<br>  "regex_replace_chars": null,<br>  "stage": null,<br>  "tags": {}<br>}</pre> | no |
+| context | Single object for setting entire context at once.<br>See description of individual variables for details.<br>Leave string and numeric variables as `null` to use default value.<br>Individual variable settings (non-null) override settings in context object,<br>except for attributes, tags, and additional\_tag\_map, which are merged. | `any` | <pre>{<br>  "additional_tag_map": {},<br>  "attributes": [],<br>  "delimiter": null,<br>  "enabled": true,<br>  "environment": null,<br>  "id_length_limit": null,<br>  "label_key_case": null,<br>  "label_order": [],<br>  "label_value_case": null,<br>  "name": null,<br>  "namespace": null,<br>  "regex_replace_chars": null,<br>  "stage": null,<br>  "tags": {}<br>}</pre> | no |
 | delimiter | Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes`.<br>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
 | enable\_lifecycle\_policy | Set to false to prevent the module from adding any lifecycle policies to any repositories | `bool` | `true` | no |
 | enabled | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
 | encryption\_configuration | ECR encryption configuration | <pre>object({<br>    encryption_type = string<br>    kms_key         = any<br>  })</pre> | `null` | no |
 | environment | Environment, e.g. 'uw2', 'us-west-2', OR 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
-| id\_length\_limit | Limit `id` to this many characters.<br>Set to `0` for unlimited length.<br>Set to `null` for default, which is `0`.<br>Does not affect `id_full`. | `number` | `null` | no |
+| id\_length\_limit | Limit `id` to this many characters (minimum 6).<br>Set to `0` for unlimited length.<br>Set to `null` for default, which is `0`.<br>Does not affect `id_full`. | `number` | `null` | no |
 | image\_names | List of Docker local image names, used as repository names for AWS ECR | `list(string)` | `[]` | no |
-| image\_tag\_mutability | The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE` | `string` | `"MUTABLE"` | no |
+| image\_tag\_mutability | The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE` | `string` | `"IMMUTABLE"` | no |
+| label\_key\_case | The letter case of label keys (`tag` names) (i.e. `name`, `namespace`, `environment`, `stage`, `attributes`) to use in `tags`.<br>Possible values: `lower`, `title`, `upper`.<br>Default value: `title`. | `string` | `null` | no |
 | label\_order | The naming order of the id output and Name tag.<br>Defaults to ["namespace", "environment", "stage", "name", "attributes"].<br>You can omit any of the 5 elements, but at least one must be present. | `list(string)` | `null` | no |
+| label\_value\_case | The letter case of output label values (also used in `tags` and `id`).<br>Possible values: `lower`, `title`, `upper` and `none` (no transformation).<br>Default value: `lower`. | `string` | `null` | no |
 | max\_image\_count | How many Docker Image versions AWS ECR will store | `number` | `500` | no |
 | name | Solution name, e.g. 'app' or 'jenkins' | `string` | `null` | no |
 | namespace | Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp' | `string` | `null` | no |
@@ -158,7 +188,7 @@ Available targets:
 | principals\_readonly\_access | Principal ARNs to provide with readonly access to the ECR | `list(string)` | `[]` | no |
 | protected\_tags | Name of image tags prefixes that should not be destroyed. Useful if you tag images with names like `dev`, `staging`, and `prod` | `set(string)` | `[]` | no |
 | regex\_replace\_chars | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
-| scan\_images\_on\_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | `bool` | `false` | no |
+| scan\_images\_on\_push | Indicates whether images are scanned after being pushed to the repository (true) or not (false) | `bool` | `true` | no |
 | stage | Stage, e.g. 'prod', 'staging', 'dev', OR 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')` | `map(string)` | `{}` | no |
 | use\_fullname | Set 'true' to use `namespace-stage-name` for ecr repository name, else `name` | `bool` | `true` | no |
@@ -265,7 +295,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 ## Copyright
 
-Copyright © 2017-2020 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2021 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 
@@ -322,8 +352,10 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 ### Contributors
 
+<!-- markdownlint-disable -->
 |  [![Igor Rodionov][goruha_avatar]][goruha_homepage]<br/>[Igor Rodionov][goruha_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Sergey Vasilyev][s2504s_avatar]][s2504s_homepage]<br/>[Sergey Vasilyev][s2504s_homepage] | [![Ivan Pinatti][ivan-pinatti_avatar]][ivan-pinatti_homepage]<br/>[Ivan Pinatti][ivan-pinatti_homepage] | [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] |
 |---|---|---|---|---|
+<!-- markdownlint-restore -->
 
   [goruha_homepage]: https://github.com/goruha
   [goruha_avatar]: https://img.cloudposse.com/150x150/https://github.com/goruha.png
