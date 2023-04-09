@@ -13,6 +13,7 @@ resource "aws_ecr_repository" "name" {
   for_each             = toset(module.this.enabled ? local.image_names : [])
   name                 = each.value
   image_tag_mutability = var.image_tag_mutability
+  force_delete         = var.force_delete
 
   dynamic "encryption_configuration" {
     for_each = var.encryption_configuration == null ? [] : [var.encryption_configuration]
@@ -87,6 +88,8 @@ data "aws_iam_policy_document" "empty" {
   count = module.this.enabled ? 1 : 0
 }
 
+data "aws_partition" "current" {}
+
 data "aws_iam_policy_document" "resource_readonly_access" {
   count = module.this.enabled ? 1 : 0
 
@@ -114,6 +117,50 @@ data "aws_iam_policy_document" "resource_readonly_access" {
       "ecr:ListTagsForResource",
     ]
   }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+
+    content {
+      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+      effect = "Allow"
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+
+      principals {
+        type        = "Service"
+        identifiers = ["lambda.amazonaws.com"]
+      }
+
+      condition {
+        test     = "StringLike"
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
+        variable = "aws:sourceArn"
+      }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+    content {
+      sid    = "CrossAccountPermission"
+      effect = "Allow"
+
+      principals {
+        type = "AWS"
+
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
+      }
+
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+    }
+  }
+
 }
 
 data "aws_iam_policy_document" "resource_full_access" {
@@ -131,12 +178,55 @@ data "aws_iam_policy_document" "resource_full_access" {
 
     actions = ["ecr:*"]
   }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+
+    content {
+      sid    = "LambdaECRImageCrossAccountRetrievalPolicy"
+      effect = "Allow"
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+
+      principals {
+        type        = "Service"
+        identifiers = ["lambda.amazonaws.com"]
+      }
+
+      condition {
+        test     = "StringLike"
+        values   = formatlist("arn:%s:lambda:*:%s:function:*", data.aws_partition.current.partition, var.principals_lambda)
+        variable = "aws:sourceArn"
+      }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(var.principals_lambda) > 0 ? [1] : []
+    content {
+      sid    = "CrossAccountPermission"
+      effect = "Allow"
+
+      principals {
+        type = "AWS"
+
+        identifiers = formatlist("arn:%s:iam::%s:root", data.aws_partition.current.partition, var.principals_lambda)
+      }
+
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+    }
+  }
 }
 
 data "aws_iam_policy_document" "resource" {
-  count         = module.this.enabled ? 1 : 0
-  source_json   = local.principals_readonly_access_non_empty ? join("", [data.aws_iam_policy_document.resource_readonly_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
-  override_json = local.principals_full_access_non_empty ? join("", [data.aws_iam_policy_document.resource_full_access[0].json]) : join("", [data.aws_iam_policy_document.empty[0].json])
+  count                     = module.this.enabled ? 1 : 0
+  source_policy_documents   = local.principals_readonly_access_non_empty ? [data.aws_iam_policy_document.resource_readonly_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
+  override_policy_documents = local.principals_full_access_non_empty ? [data.aws_iam_policy_document.resource_full_access[0].json] : [data.aws_iam_policy_document.empty[0].json]
 }
 
 resource "aws_ecr_repository_policy" "name" {
